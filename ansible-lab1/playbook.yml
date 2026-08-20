@@ -1,0 +1,19 @@
+---
+- name: My First Ansible Playbook
+  hosts: local
+  tasks:
+
+    - name: Print welcome message
+      ansible.builtin.debug:
+        msg: "Hello from Ansible Automation!"
+
+    - name: Create a test directory
+      ansible.builtin.file:
+        path: ./ansible_created_dir
+        state: directory
+        mode: '0755'
+
+    - name: Create a dummy file inside the directory
+      ansible.builtin.copy:
+        content: "This file was created automatically by Ansible!\n"
+        dest: ./ansible_created_dir/hello.txt

@@ -1,0 +1,17 @@
+---
+- name: Configure Web Server with Ansible
+  hosts: local
+  become: true # הרצה כ-root (sudo) במידת הצורך
+
+  tasks:
+    - name: Ensure Nginx is installed
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: Ensure Nginx service is running and enabled on boot
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: yes

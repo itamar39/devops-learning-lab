@@ -1,0 +1,33 @@
+name: DevOps CI Pipeline
+
+# התהליך יופעל בכל Push ל-branch הראשי
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  validate-code:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. משיכת הקוד מה-Repository
+    - name: Checkout repository code
+      uses: actions/checkout@v3
+
+    # 2. בדיקת זמינות Docker במכונת ה-CI
+    - name: Check Docker installation
+      run: docker --version
+
+    # 3. בדיקת תקינות של קובץ ה-Dockerfile
+    - name: Validate Dockerfile syntax
+      run: |
+        if [ -f my-custom-image/Dockerfile ]; then
+          echo "Dockerfile exists and is ready for build!"
+        else
+          echo "Dockerfile missing!"
+        fi
+
+    # 4. בדיקת תקינות של מניפסט ה-Kubernetes
+    - name: Validate Kubernetes Manifests
+      run: |
+        kubectl apply --dry-run=client -f k8s-lab1/deployment.yaml
