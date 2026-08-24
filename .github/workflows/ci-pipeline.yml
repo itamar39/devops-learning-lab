@@ -9,20 +9,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # 1. משיכת הקוד מה-Repository
     - name: Checkout repository code
       uses: actions/checkout@v3
 
+    # 2. בדיקת זמינות Docker במכונת ה-CI
     - name: Check Docker installation
       run: docker --version
 
+    # 3. בדיקת תקינות של קובץ ה-Dockerfile
     - name: Validate Dockerfile syntax
       run: |
         if [ -f my-custom-image/Dockerfile ]; then
           echo "Dockerfile exists and is ready for build!"
         else
           echo "Dockerfile missing!"
+          exit 1
         fi
 
+    # 4. בדיקת תקינות מניפסט ה-Kubernetes ללא תלות בקלאסטר חי
     - name: Validate Kubernetes Manifests
       run: |
-        kubectl apply --dry-run=client --validate=false -f k8s-lab1/deployment.yaml
+        kubectl apply -f k8s-lab1/deployment.yaml --dry-run=client -o yaml
