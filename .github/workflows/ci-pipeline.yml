@@ -20,7 +20,7 @@ jobs:
     # 3. בדיקת תקינות של קובץ ה-Dockerfile
     - name: Validate Dockerfile syntax
       run: |
-        if [ -f my-custom-image/Dockerfile ]; then
+        if [ -f my-custome-image/Dockerfile ]; then
           echo "Dockerfile exists and is ready for build!"
         else
           echo "Dockerfile missing!"
