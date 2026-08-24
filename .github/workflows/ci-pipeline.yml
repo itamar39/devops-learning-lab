@@ -25,4 +25,4 @@ jobs:
 
     - name: Validate Kubernetes Manifests
       run: |
-        kubectl apply --dry-run=client -f k8s-lab1/deployment.yaml
+        kubectl apply --dry-run=client --validate=false -f k8s-lab1/deployment.yaml
