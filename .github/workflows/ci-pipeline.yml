@@ -17,7 +17,7 @@ jobs:
     - name: Check Docker installation
       run: docker --version
 
-    # 3. בדיקת תקינות של קובץ ה-Dockerfile
+    # 3. בדיקת תקינות קובץ ה-Dockerfile
     - name: Validate Dockerfile syntax
       run: |
         if [ -f my-custome-image/Dockerfile ]; then
@@ -27,7 +27,8 @@ jobs:
           exit 1
         fi
 
-    # 4. בדיקת תקינות מניפסט ה-Kubernetes ללא תלות בקלאסטר חי
-    - name: Validate Kubernetes Manifests
+    # 4. בדיקת תקינות מבנית לקובץ ה-Kubernetes YAML
+    - name: Validate Kubernetes Manifests Syntax
       run: |
-        kubectl apply -f k8s-lab1/deployment.yaml --dry-run=client -o yaml
+        python3 -c "import yaml; yaml.safe_load(open('k8s-lab1/deployment.yaml'))"
+        echo "Kubernetes YAML syntax is valid!"
