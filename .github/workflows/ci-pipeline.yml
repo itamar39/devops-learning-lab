@@ -39,15 +39,25 @@ jobs:
         python3 -c "import yaml; yaml.safe_load(open('k8s-lab1/deployment.yaml'))"        
         echo "Kubernetes YAML syntax is valid!"
 
-    # 5. [תוספת]: בדיקת תקינות קובצי Terraform (אם קיימים ב-Repo)
-    - name: Setup & Validate Terraform Syntax
+# התקנה רשמית ומהירה של Terraform
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: "1.8.0"
+
+    # בדיקת קבצים בתיקיה הראשית
+    - name: Validate Root Terraform
+      run: |
+        terraform init -backend=false
+        terraform validate
+        echo "Root Terraform syntax is valid!"
+
+    # בדיקת קבצים בתיקיית terraform-lab1
+    - name: Validate Lab1 Terraform
       run: |
         if [ -d terraform-lab1 ]; then
-          sudo apt-get update && sudo apt-get install -y terraform
-          cd terraform
+          cd terraform-lab1
           terraform init -backend=false
           terraform validate
-          echo "Terraform syntax is valid!"
-        else
-          echo "No terraform directory found, skipping."
+          echo "Lab1 Terraform syntax is valid!"
         fi
