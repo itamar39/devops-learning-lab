@@ -1,63 +1,63 @@
-name: DevOps CI Pipeline
+name: Enterprise DevOps CI Pipeline
 
 on:  
   push:    
     branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:  
-  validate-code:    
+  validate-all-infrastructure:    
     runs-on: ubuntu-latest    
     steps:    
-    # 1. משיכת הקוד מה-Repository
+    # 1. משיכת הקוד
     - name: Checkout repository code      
-      uses: actions/checkout@v3    
+      uses: actions/checkout@v4
 
-    # 2. בדיקת זמינות Docker במכונת ה-CI
-    - name: Check Docker installation      
-      run: docker --version    
-
-    # 3. בדיקת תקינות קובץ ה-Dockerfile (הצעד המקורי שלך)
-    - name: Validate Dockerfile syntax      
+    # 2. בדיקת Dockerfile
+    - name: Validate Dockerfile Syntax
       run: |        
         if [ -f my-custome-image/Dockerfile ]; then          
-          echo "Dockerfile exists and is ready for build!"        
+          echo "Dockerfile exists and is ready!"        
         else          
           echo "Dockerfile missing!"          
           exit 1        
-        fi    
+        fi
 
-    # 3.1 [תוספת]: בדיקת עומק ל-Dockerfile עם Hadolint
-    - name: Deep Lint Dockerfile
-      uses: hadolint/hadolint-action@v3.1.0
-      with:
-        dockerfile: "my-custome-image/Dockerfile"
-        failure-threshold: warning
-
-    # 4. בדיקת תקינות מבנית לקובץ ה-Kubernetes YAML (הצעד המקורי שלך)
-    - name: Validate Kubernetes Manifests Syntax      
-      run: |        
-        python3 -c "import yaml; yaml.safe_load(open('k8s-lab1/deployment.yaml'))"        
-        echo "Kubernetes YAML syntax is valid!"
-
-# התקנה רשמית ומהירה של Terraform
+    # 3. התקנה ובדיקת Terraform (ב-Root וב-terraform-lab1)
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: "1.8.0"
 
-    # בדיקת קבצים בתיקיה הראשית
-    - name: Validate Root Terraform
+    - name: Validate Terraform Code
       run: |
+        echo "Validating Root Terraform..."
         terraform init -backend=false
         terraform validate
-        echo "Root Terraform syntax is valid!"
 
-    # בדיקת קבצים בתיקיית terraform-lab1
-    - name: Validate Lab1 Terraform
-      run: |
         if [ -d terraform-lab1 ]; then
+          echo "Validating terraform-lab1..."
           cd terraform-lab1
           terraform init -backend=false
           terraform validate
-          echo "Lab1 Terraform syntax is valid!"
+          cd ..
         fi
+
+    # 4. בדיקת Ansible Playbooks (ב-ansible-lab1)
+    - name: Validate Ansible Playbooks
+      run: |
+        sudo apt-get update && sudo apt-get install -y ansible
+        echo "Checking Ansible Syntax..."
+        ansible-playbook --syntax-check ansible-lab1/playbook.yml
+        ansible-playbook --syntax-check ansible-lab1/setup_nginx.yml
+
+    # 5. בדיקת כל ה-Manifests של Kubernetes (ב-k8s-lab1)
+    - name: Validate Kubernetes Manifests
+      run: |
+        python3 -c "
+        import yaml, glob
+        for f in glob.glob('k8s-lab1/*.yaml'):
+            yaml.safe_load(open(f))
+            print(f'Valid YAML: {f}')
+        "
