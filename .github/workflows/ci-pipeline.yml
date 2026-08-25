@@ -49,8 +49,8 @@ jobs:
       run: |
         sudo apt-get update && sudo apt-get install -y ansible
         echo "Checking Ansible Syntax..."
-        ansible-playbook --syntax-check ansible-lab1/playbook.yml
-        ansible-playbook --syntax-check ansible-lab1/setup_nginx.yml
+        ansible-playbook -i "localhost," --syntax-check ansible-lab1/playbook.yml
+        ansible-playbook -i "localhost," --syntax-check ansible-lab1/setup_nginx.yml
 
     # 5. בדיקת כל ה-Manifests של Kubernetes (ב-k8s-lab1)
     - name: Validate Kubernetes Manifests
