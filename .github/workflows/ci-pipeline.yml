@@ -1,34 +1,53 @@
 name: DevOps CI Pipeline
 
-on:
-  push:
+on:  
+  push:    
     branches: [ main, master ]
 
-jobs:
-  validate-code:
-    runs-on: ubuntu-latest
-
-    steps:
+jobs:  
+  validate-code:    
+    runs-on: ubuntu-latest    
+    steps:    
     # 1. משיכת הקוד מה-Repository
-    - name: Checkout repository code
-      uses: actions/checkout@v3
+    - name: Checkout repository code      
+      uses: actions/checkout@v3    
 
     # 2. בדיקת זמינות Docker במכונת ה-CI
-    - name: Check Docker installation
-      run: docker --version
+    - name: Check Docker installation      
+      run: docker --version    
 
-    # 3. בדיקת תקינות קובץ ה-Dockerfile
-    - name: Validate Dockerfile syntax
-      run: |
-        if [ -f my-custome-image/Dockerfile ]; then
-          echo "Dockerfile exists and is ready for build!"
-        else
-          echo "Dockerfile missing!"
-          exit 1
-        fi
+    # 3. בדיקת תקינות קובץ ה-Dockerfile (הצעד המקורי שלך)
+    - name: Validate Dockerfile syntax      
+      run: |        
+        if [ -f my-custome-image/Dockerfile ]; then          
+          echo "Dockerfile exists and is ready for build!"        
+        else          
+          echo "Dockerfile missing!"          
+          exit 1        
+        fi    
 
-    # 4. בדיקת תקינות מבנית לקובץ ה-Kubernetes YAML
-    - name: Validate Kubernetes Manifests Syntax
-      run: |
-        python3 -c "import yaml; yaml.safe_load(open('k8s-lab1/deployment.yaml'))"
+    # 3.1 [תוספת]: בדיקת עומק ל-Dockerfile עם Hadolint
+    - name: Deep Lint Dockerfile
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: "my-custome-image/Dockerfile"
+        failure-threshold: warning
+
+    # 4. בדיקת תקינות מבנית לקובץ ה-Kubernetes YAML (הצעד המקורי שלך)
+    - name: Validate Kubernetes Manifests Syntax      
+      run: |        
+        python3 -c "import yaml; yaml.safe_load(open('k8s-lab1/deployment.yaml'))"        
         echo "Kubernetes YAML syntax is valid!"
+
+    # 5. [תוספת]: בדיקת תקינות קובצי Terraform (אם קיימים ב-Repo)
+    - name: Setup & Validate Terraform Syntax
+      run: |
+        if [ -d terraform ]; then
+          sudo apt-get update && sudo apt-get install -y terraform
+          cd terraform
+          terraform init -backend=false
+          terraform validate
+          echo "Terraform syntax is valid!"
+        else
+          echo "No terraform directory found, skipping."
+        fi
